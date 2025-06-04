@@ -343,6 +343,24 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#jenkinsfile-interfaces" class="md-nav__link">
+    <span class="md-ellipsis">
+      Jenkinsfile – Interfaces
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#jenkinsfile-services" class="md-nav__link">
+    <span class="md-ellipsis">
+      Jenkinsfile – Services
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#pipeline-de-deploy" class="md-nav__link">
     <span class="md-ellipsis">
       Pipeline de Deploy
@@ -454,6 +472,24 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#jenkinsfile-interfaces" class="md-nav__link">
+    <span class="md-ellipsis">
+      Jenkinsfile – Interfaces
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#jenkinsfile-services" class="md-nav__link">
+    <span class="md-ellipsis">
+      Jenkinsfile – Services
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#pipeline-de-deploy" class="md-nav__link">
     <span class="md-ellipsis">
       Pipeline de Deploy
@@ -498,6 +534,55 @@
 <h2 id="jenkins">Jenkins</h2>
 <p>O Jenkins é uma plataforma de automação open-source amplamente utilizada para CI/CD. Ele permite a orquestração de pipelines que automatizam desde os testes até o deploy em produção.</p>
 <p><img alt="Jenkins" src="../images/jenkins1.png" /></p>
+<h2 id="jenkinsfile-interfaces">Jenkinsfile – Interfaces</h2>
+<p>As interfaces (como <code>product</code>, <code>order</code>, <code>account</code>) utilizam um Jenkinsfile simples para build Maven:</p>
+<pre><code class="language-groovy">pipeline {
+    agent any
+
+    stages {
+        stage('Build') {
+            steps {
+                sh 'mvn -B -DskipTests clean install'
+            }
+        }
+    }
+}
+</code></pre>
+<p>Este pipeline <strong>compila o código</strong> e garante que as dependências estejam corretas, mas não realiza deploy de imagens.</p>
+<hr />
+<h2 id="jenkinsfile-services">Jenkinsfile – Services</h2>
+<p>Para os services (como <code>order-service</code>, <code>product-service</code>, etc.), o Jenkinsfile realiza também o build da imagem Docker e seu push para o Docker Hub:</p>
+<pre><code class="language-groovy">pipeline {
+    agent any
+    environment {
+        SERVICE = 'order-service'
+        NAME = &quot;rafaelaafferri/${env.SERVICE}&quot;
+    }
+    stages {
+        stage('Dependecies') {
+            steps {
+                build job: 'order', wait: true
+                build job: 'product', wait: true
+            }
+        }
+        stage('Build') { 
+            steps {
+                sh 'mvn -B -DskipTests clean package'
+            }
+        }      
+        stage('Build &amp; Push Image') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'dockerhub-credential', usernameVariable: 'USERNAME', passwordVariable: 'TOKEN')]) {
+                    sh &quot;docker login -u $USERNAME -p $TOKEN&quot;
+                    sh &quot;docker buildx create --use --platform=linux/arm64,linux/amd64 --node multi-platform-builder-${env.SERVICE} --name multi-platform-builder-${env.SERVICE}&quot;
+                    sh &quot;docker buildx build --platform=linux/arm64,linux/amd64 --push --tag ${env.NAME}:latest --tag ${env.NAME}:${env.BUILD_ID} -f Dockerfile .&quot;
+                    sh &quot;docker buildx rm --force multi-platform-builder-${env.SERVICE}&quot;
+                }
+            }
+        }
+    }
+}
+</code></pre>
 <h2 id="pipeline-de-deploy">Pipeline de Deploy</h2>
 <p>Na nossa solução, o Jenkins foi configurado para realizar o <code>kubectl apply</code> dos manifests diretamente no cluster gerenciado pela AWS através do EKS.</p>
 <h3 id="etapas-principais-do-pipeline">Etapas principais do pipeline:</h3>
