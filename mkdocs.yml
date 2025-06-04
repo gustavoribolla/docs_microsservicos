@@ -1,0 +1,13 @@
+site_name: Entrega Final - Plataforma 2025.1
+site_author: Gustavo Colombi Ribolla, Rafaela Afférri de Oliveira
+theme:
+  name: material
+
+nav:
+  - Início: index.md
+  - AWS: aws.md
+  - EKS: eks.md
+  - Testes de Carga: testes-de-carga.md
+  - CI/CD: ci-cd.md
+  - Análise de Custos: analise-de-custos.md
+  - PaaS: paas.md
