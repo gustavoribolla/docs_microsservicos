@@ -5,6 +5,8 @@
 
 PaaS (Plataforma como Serviço) é um modelo de computação em nuvem que fornece um ambiente gerenciado para desenvolver, testar e executar aplicações, abstraindo a infraestrutura subjacente. Com PaaS, a equipe de desenvolvimento pode focar no código e na lógica da aplicação, enquanto a plataforma cuida de aspectos como provisionamento de recursos, escalabilidade e atualização de ambiente.
 
+![PAAS](images/paas.png)
+
 ## Onde Utilizamos PaaS no Projeto
 
 ### 1. Amazon EKS (Elastic Kubernetes Service)
